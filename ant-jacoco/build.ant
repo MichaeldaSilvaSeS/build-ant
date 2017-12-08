@@ -1,0 +1,125 @@
+<project name="ant-jacoco" default="build" xmlns:jacoco="antlib:org.jacoco.ant">
+	
+	<property file="config.properties"/>
+	
+	<path id="to.lib.prj.pth">
+		<fileset dir="${to.lib.prj.dir}">
+    		<include name="**/*"/>
+		</fileset>
+	</path>
+	
+	 <pathconvert property="to.lib.prj.pth.mnf" pathsep=" ">
+	    <mapper>
+	      <chainedmapper>
+	        <flattenmapper />
+	        <globmapper from="*" to="${dist.lib}*" />
+	      </chainedmapper>
+	    </mapper>
+	    <path refid="to.lib.prj.pth"/>
+	 </pathconvert>
+	
+	<path id="to.lib.tst.pth" >
+		<fileset dir="${to.lib.tst.dir}">
+    		<include name="**/*"/>
+		</fileset>
+	</path>
+	
+	 <pathconvert property="to.lib.tst.pth.mnf" pathsep=" ">
+	    <mapper>
+	      <chainedmapper>
+	        <flattenmapper />
+	        <globmapper from="*" to="${dist.lib}*" />
+	      </chainedmapper>
+	    </mapper>
+	    <path refid="to.lib.tst.pth"/>
+	 </pathconvert>
+	
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        <classpath path="${to.lib.tst.path}"/>
+    </taskdef>
+	
+	<target name="limpar">
+		<echo message="Preparar pastas e arquivos ... ${to.lib.prj.pth}" />
+		<delete dir="${to.bin}"/>
+		<mkdir dir="${to.bin}"/>
+		<delete dir="${to.dist}"/>
+		<mkdir dir="${to.dist}"/>
+		<delete dir="${to.est}"/>
+		<mkdir dir="${to.est}"/>
+		<delete dir="${dist.lib.dir}"/>
+		<mkdir dir="${dist.lib.dir}"/>
+		<delete dir="${to.prj.src.dir}"/>
+		<mkdir dir="${to.prj.src.dir}"/>
+	</target>
+	
+	<target name="compilarProjeto">
+		<echo message="Compilacao do projeto ... " />
+		<javac srcdir="${from.prj.src.dir}" destdir="${to.prj.src.dir}" includeantruntime="true">
+			<classpath refid="to.lib.prj.pth"/>
+		</javac>
+	</target>
+	
+	<target name="empacotarProjeto">
+		<echo message="Empacotamento do projeto ... " />
+		<jar basedir="${to.prj.src.dir}" destfile="${to.prj.bin}" >
+			<manifest>
+				<attribute name="Rsrc-Class-Path" value="./ ${to.lib.prj.pth.mnf}"/>
+				<attribute name="Class-Path" value="."/>
+				<attribute name="Rsrc-Main-Class" value="${to.prj.main.clazz}"/>
+				<attribute name="Main-Class" value="${dist.eclipse.loader}"/>				
+			</manifest>
+			<zipfileset dir="${to.lib.prj.dir}" />
+		</jar>
+	</target>
+	
+	<target name="compilarTeste">
+		<echo message="Compilacao do teste ..." />
+		<delete dir="${to.tst.src.dir}"/>
+		<mkdir dir="${to.tst.src.dir}"/>
+		<javac srcdir="${from.tst.src.dir}" destdir="${to.tst.src.dir}" includeantruntime="false" debug="true">
+			<classpath>
+				<pathelement path="${to.prj.bin}"/>
+				<path refid="to.lib.tst.pth"/>
+			</classpath>			
+		</javac>
+	</target>
+	
+	<target name="empacotarTeste">
+		<echo message="Empacotamento do teste ... " />
+		<jar basedir="${to.tst.src.dir}" destfile="${to.tst.bin}" >
+			<manifest>
+				<attribute name="Class-Path" value="${to.lib.tst.pth.mnf}"/>
+				<attribute name = "Main-Class" value = "br.com.test.ant.jacoco.Calculadora"/>
+			</manifest>
+			<zipfileset dir="${to.lib.tst.dir}"/>
+		</jar>
+	</target>
+	
+	<target name="reportarTeste">
+		<jacoco:coverage destfile="${to.tst.est.coverge}">
+		    <junit showoutput="true" fork="true" forkmode="once" printsummary="true">
+		        <test name="${to.tst.clazz}" haltonfailure="true"/>
+		        <classpath>
+		        	<pathelement path="${to.tst.classpath}"/>
+		        	<pathelement path="${to.prj.bin}"/>
+		            <pathelement path="${to.tst.bin}"/>
+		        </classpath>
+		    </junit>
+		</jacoco:coverage>
+	    <jacoco:report>
+	        <executiondata>
+	            <file file="${to.tst.est.coverge}"/>
+	        </executiondata>
+	        <structure name="ant-jacoco">
+	            <classfiles>
+	                <fileset dir="${to.tst.src.dir}"/>
+	            	<fileset dir="${to.prj.src.dir}"/>
+	            </classfiles>
+	        </structure>                            
+	        <html destdir="${to.tst.est}"/>                            
+	    </jacoco:report>
+	</target>
+	
+    <target name="build"
+    	depends="limpar,compilarProjeto,empacotarProjeto,compilarTeste,empacotarTeste" />
+</project>
