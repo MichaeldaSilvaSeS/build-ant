@@ -92,15 +92,14 @@
 	</target>
 	
 	<target name="reportarTeste">
-		<jacoco:coverage destfile="${to.tst.est.coverge}">
-		    <junit showoutput="true" fork="true" forkmode="once" printsummary="true">
-		        <test name="${to.tst.clazz}" haltonfailure="true"/>
+		<jacoco:coverage destfile="${to.tst.est.coverge}" >
+		    <junit showoutput="true" fork="true" forkmode="once" printsummary="true" haltonfailure="true">
+		        <test name="${to.tst.clazz}"/>
 		        <classpath>
 		        	<path refid="to.lib.tst.pth" />
 		        	<pathelement path="${to.prj.bin}"/>
 		            <pathelement path="${to.tst.bin}"/>
 		        </classpath>
-		    	
 		    </junit>
 			
 		</jacoco:coverage>
