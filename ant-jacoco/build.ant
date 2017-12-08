@@ -35,7 +35,7 @@
 	 </pathconvert>
 	
 	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-        <classpath path="${to.lib.tst.path}"/>
+        <classpath refid="to.lib.tst.pth"/>
     </taskdef>
 	
 	<target name="limpar">
@@ -87,10 +87,6 @@
 	<target name="empacotarTeste">
 		<echo message="Empacotamento do teste ... " />
 		<jar basedir="${to.tst.src.dir}" destfile="${to.tst.bin}" >
-			<manifest>
-				<attribute name="Class-Path" value="${to.lib.tst.pth.mnf}"/>
-				<attribute name = "Main-Class" value = "br.com.test.ant.jacoco.Calculadora"/>
-			</manifest>
 			<zipfileset dir="${to.lib.tst.dir}"/>
 		</jar>
 	</target>
@@ -100,11 +96,13 @@
 		    <junit showoutput="true" fork="true" forkmode="once" printsummary="true">
 		        <test name="${to.tst.clazz}" haltonfailure="true"/>
 		        <classpath>
-		        	<pathelement path="${to.tst.classpath}"/>
+		        	<path refid="to.lib.tst.pth" />
 		        	<pathelement path="${to.prj.bin}"/>
 		            <pathelement path="${to.tst.bin}"/>
 		        </classpath>
+		    	
 		    </junit>
+			
 		</jacoco:coverage>
 	    <jacoco:report>
 	        <executiondata>
@@ -121,5 +119,5 @@
 	</target>
 	
     <target name="build"
-    	depends="limpar,compilarProjeto,empacotarProjeto,compilarTeste,empacotarTeste" />
+    	depends="limpar,compilarProjeto,empacotarProjeto,compilarTeste,empacotarTeste,reportarTeste" />
 </project>
