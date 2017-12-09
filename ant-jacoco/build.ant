@@ -39,7 +39,7 @@
     </taskdef>
 	
 	<target name="limpar">
-		<echo message="Preparar pastas e arquivos ... ${to.lib.prj.pth}" />
+		<echo message="Preparar pastas e arquivos ... " />
 		<delete dir="${to.bin}"/>
 		<mkdir dir="${to.bin}"/>
 		<delete dir="${to.dist}"/>
@@ -93,15 +93,14 @@
 	
 	<target name="reportarTeste">
 		<jacoco:coverage destfile="${to.tst.est.coverge}" >
-		    <junit showoutput="true" fork="true" forkmode="once" printsummary="true" haltonfailure="true">
+		    <junit showoutput="true" fork="true" forkmode="once" printsummary="true" haltonfailure="false" >
 		        <test name="${to.tst.clazz}"/>
 		        <classpath>
 		        	<path refid="to.lib.tst.pth" />
 		        	<pathelement path="${to.prj.bin}"/>
 		            <pathelement path="${to.tst.bin}"/>
 		        </classpath>
-		    </junit>
-			
+		    </junit>			
 		</jacoco:coverage>
 	    <jacoco:report>
 	        <executiondata>
